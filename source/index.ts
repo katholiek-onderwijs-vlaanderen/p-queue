@@ -228,13 +228,13 @@ export default class PQueue<QueueType extends Queue<EnqueueOptionsType> = Priori
 	*/
 	async add<TaskResultType>(fn: Task<TaskResultType>, options: Partial<EnqueueOptionsType> = {}): Promise<TaskResultType> {
 		return new Promise<TaskResultType>((resolve, reject) => {
-			const run = async (): Promise<void> => {
+			const run = async (arg): Promise<void> => {
 				this._pendingCount++;
 				this._intervalCount++;
 
 				try {
-					const operation = (this._timeout === undefined && options.timeout === undefined) ? fn() : pTimeout(
-						Promise.resolve(fn()),
+					const operation = (this._timeout === undefined && options.timeout === undefined) ? fn(arg) : pTimeout(
+						Promise.resolve(fn(arg)),
 						(options.timeout === undefined ? this._timeout : options.timeout) as number,
 						() => {
 							if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
