@@ -8,7 +8,9 @@ type ResolveFunction<T = void> = (value?: T | PromiseLike<T>) => void;
 
 type Task<TaskResultType> =
 	| (() => PromiseLike<TaskResultType>)
-	| (() => TaskResultType);
+	| (() => TaskResultType)
+	| ((arg:any) => PromiseLike<TaskResultType>)
+	| ((arg:any) => TaskResultType);	
 
 const empty = (): void => {};
 
@@ -164,7 +166,7 @@ export default class PQueue<QueueType extends Queue<EnqueueOptionsType> = Priori
 			if (this._doesIntervalAllowAnother && this._doesConcurrentAllowAnother) {
 				this.emit('active');
 
-				this._queue.dequeue()!();
+				this._queue.dequeue()!(null);
 				if (canInitializeInterval) {
 					this._initializeIntervalIfNeeded();
 				}
@@ -228,7 +230,7 @@ export default class PQueue<QueueType extends Queue<EnqueueOptionsType> = Priori
 	*/
 	async add<TaskResultType>(fn: Task<TaskResultType>, options: Partial<EnqueueOptionsType> = {}): Promise<TaskResultType> {
 		return new Promise<TaskResultType>((resolve, reject) => {
-			const run = async (arg): Promise<void> => {
+			const run = async (arg:any): Promise<void> => {
 				this._pendingCount++;
 				this._intervalCount++;
 
